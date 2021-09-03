@@ -1,0 +1,3 @@
+[submodule "arbitrum"]
+	path = arbitrum
+	url = git@github.com:OffchainLabs/arbitrum.git
