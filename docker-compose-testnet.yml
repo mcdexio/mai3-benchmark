@@ -21,5 +21,5 @@ services:
         volumes:
             - /Users/champ/MCDEX/mai3-benchmark/arbitrum/rollups/local/validator1:/home/user/state
         image: arb-validator
-        # extra_flags, rpc_url, rollup_address, validator_utils_address, validator_wallet_factory_address, strategy
+        # extra_flags, rpc_url, rollup_address, bridge_utils, validator_utils_address, validator_wallet_factory_address, strategy
         command: state http://arb-bridge-eth-geth:7545 0x2C15a6b30EC9eB5E1486bcd2Aa49E2699E3AE85D 0x603B563e088859CB752e983AAD9E47BA1A6120C9 0xD02bEC7Ee5Ee73A271B144E829EeD1C19218D813 0xAa63764C8942343c903aA3469afe664f6E24FFe2 MakeNodes  --password=pass
