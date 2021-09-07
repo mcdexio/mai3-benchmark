@@ -26,7 +26,5 @@ RUN yarn global add truffle
 RUN git clone -b master https://github.com/offchainlabs/arbitrum.git
 WORKDIR "arbitrum"
 RUN git submodule update --init --recursive
-RUN git checkout v0.8.0
-RUN git checkout -b v0.8.0
 RUN yarn
 RUN yarn build
