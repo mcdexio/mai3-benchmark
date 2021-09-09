@@ -16,3 +16,8 @@
 2. yarn demo:deploy (it will failed)
 3. reference mai3-benchmark/docker-compose-testnet-template.yml to update mai3-benchmark/arbitrum/docker-compose
 4. docker-compose up
+5. rollupOwn call rollup admin（rollupAddress)'s updateWhitelistConsumers
+   1. "whitelist's address"
+   2. 0x0000000000000000000000000000000000000000
+   3. ["inboxAddress"]
+6. call depositEth (inboxAddress)
