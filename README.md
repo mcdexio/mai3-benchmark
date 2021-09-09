@@ -13,4 +13,6 @@
 2. yarn docker:geth
 ## build arbitrum
 1. yarn demo:initialize --force=true
-2. yarn demo:deploy
+2. yarn demo:deploy (it will failed)
+3. reference mai3-benchmark/docker-compose-testnet-template.yml to update mai3-benchmark/arbitrum/docker-compose
+4. docker-compose up
