@@ -16,8 +16,9 @@
 1. yarn demo:initialize --force=true
    1. will depend on arbitrum/packages/arb-bridge-eth/bridge_eth_address.json
 2. yarn demo:deploy
-3. rollupOwn call rollup admin（rollupAddress)'s updateWhitelistConsumers
-   1. "whitelist's address"
-   2. 0x0000000000000000000000000000000000000000
-   3. ["inboxAddress"]
-4. call depositEth (inboxAddress)
+## Remove whitelist
+1. npx hardhat --network local_development remove-whitelist
+   1. rollupOwn call rollup admin（rollupAddress)'s updateWhitelistConsumers
+      1. "whitelist's address" # get address from inbox
+      2. 0x0000000000000000000000000000000000000000
+      3. ["inboxAddress"]
