@@ -1,6 +1,6 @@
-[submodule "mai3"]
-	path = mai3
-	url = git@github.com:mcdexio/mai-protocol-v3.git
 [submodule "arbitrum"]
 	path = arbitrum
 	url = git@github.com:champfu-mcdex/arbitrum.git
+[submodule "mai-protocol-v3"]
+	path = mai-protocol-v3
+	url = git@github.com:mcdexio/mai-protocol-v3.git
