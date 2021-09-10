@@ -22,3 +22,5 @@
       1. "whitelist's address" # get address from inbox
       2. 0x0000000000000000000000000000000000000000
       3. ["inboxAddress"]
+## Deposit
+1. npx hardhat --network local_development deposit inbox_address private_key dest_address amount(wei)
