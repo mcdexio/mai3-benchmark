@@ -25,8 +25,7 @@
 ## deposit
 1. npx hardhat --network local_development deposit inbox_address private_key dest_address amount(wei)
 
-# mai-protocol-v3
-1. cd mai-protocol-v3
-2. npm install 
-3. npx hardhat compile
-4. npx hardhat --network local_development run scripts/deployFromScratch.ts
+# deploy mai-protocol-v3
+1. cd mai3-benchmark
+2. yarn
+3. yarn deploy-from-scratch
