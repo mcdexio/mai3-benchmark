@@ -30,17 +30,11 @@ RUN npm install -g yarn
 # install truffle
 RUN yarn global add truffle
 
-RUN git clone -b v6.11.4 https://github.com/facebook/rocksdb.git
-WORKDIR "rocksdb"
-RUN make -j 16 shared_lib
-RUN make install-shared
-
 WORKDIR /
 
-RUN git clone -b master https://github.com/offchainlabs/arbitrum.git
-WORKDIR "arbitrum"
-RUN git checkout 69c58d6b33
-RUN git checkout -b testnet
-RUN git submodule update --init --recursive
-RUN yarn
-RUN yarn build
+RUN git clone https://github.com/mcdexio/mai3-benchmark.git
+WORKDIR "mai3-benchmark"
+RUN git checkout dev
+# RUN git submodule update --init --recursive
+# RUN yarn
+# RUN yarn build
