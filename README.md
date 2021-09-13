@@ -4,7 +4,7 @@
 2. cd mai3-benchmark
 3. git submodule update --init --recursive
 
-# arbitrum
+# Arbitrum
 1. cd arbitrum
 2. yarn
 3. yarn build
@@ -16,11 +16,17 @@
 1. yarn demo:initialize [--force=true]
    1. will depend on arbitrum/packages/arb-bridge-eth/bridge_eth_address.json
 2. yarn demo:deploy
-## Remove whitelist
+## remove whitelist
 1. yarn remove-whitelist
    1. rollupOwn call rollup admin（rollupAddress)'s updateWhitelistConsumers
       1. "whitelist's address" # get address from inbox
       2. 0x0000000000000000000000000000000000000000
       3. ["inboxAddress"]
-## Deposit
+## deposit
 1. npx hardhat --network local_development deposit inbox_address private_key dest_address amount(wei)
+
+# mai-protocol-v3
+1. cd mai-protocol-v3
+2. npm install 
+3. npx hardhat compile
+4. npx hardhat --network local_development run scripts/deployFromScratch.ts
