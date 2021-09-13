@@ -49,8 +49,8 @@ async function main(ethers, deployer, accounts) {
   // deploy oracle
   const oracle = await deployer.deploy("OracleAdaptor", "USD", "ETH")
   let now = Math.floor(Date.now() / 1000);
-  await ensureFinished(oracle.setIndexPrice(1000, now))
-  await ensureFinished(oracle.setMarkPrice(1100, now))
+  await ensureFinished(oracle.setIndexPrice(100, now))
+  await ensureFinished(oracle.setMarkPrice(100, now))
 
   // createPerpetual
   const n = await poolCreator.getLiquidityPoolCount();
