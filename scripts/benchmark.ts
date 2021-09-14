@@ -16,26 +16,45 @@ function toWei(n) { return hre.ethers.utils.parseEther(n) }
 const vaultFeeRate = toWei("0");
 const vault = "0x81183C9C61bdf79DB7330BBcda47Be30c0a85064"
 let masterAcc;
-let tradesWallet = [];
-let tradesWalletAdd = [];
+let traders = [];
 let mockUSDCContract;
 let disperseContract;
 let latestLiquidityPoolContract;
 let readerContract;
 
 async function distribute(count: number, ethers) {
+  const startTime = Date.now()
+  console.log("start distribute " +startTime)
+  const values = []
   for (let i = 0; i < count; i++) {
     // need to connect to provider
     const newWallet = ethers.Wallet.createRandom().connect(ethers.provider)
-    const add = await newWallet.address
-    tradesWallet.push(newWallet)
-    tradesWalletAdd.push(add)
-    await ensureFinished(mockUSDCContract.mint(add, "25000000" + "000000"))
-    await ensureFinished(mockUSDCContract.approve(latestLiquidityPoolContract.address, "25000000" + "000000"))
+    traders.push(newWallet)
+    values.push(1)
   }
-  // distribute 1 eth to count of accounts
-  disperseContract.disperseEther(tradesWalletAdd, toWei("1"))
-  console.log("Done distribute")
+  // ETH: distribute 1 eth to count of accounts
+  await disperseContract.connect(masterAcc).disperseEther(
+    traders.map(X => X.address),
+    traders.map(X => toWei("1")),
+    {value: toWei("10")}
+  )
+  await disperseContract.connect(masterAcc).disperseToken(
+    mockUSDCContract.address,
+    traders.map(X => X.address),
+    traders.map(X => 100000000)
+  )
+  const endTime = Date.now()
+  console.log("Done distribute end " + endTime + " spend time " + (endTime-startTime)/1000)
+  let txs = []
+  const tx = async (trader) => {
+    txs.push(await mockUSDCContract.connect(trader).approve(latestLiquidityPoolContract.address, "100" + "000000"))
+  }
+  traders.map(x => tx(x))
+  const tx1 = async (trader) => {
+    txs.push(await latestLiquidityPoolContract.connect(trader).setTargetLeverage(0, trader.address, toWei("25")))
+  }
+  traders.map(x => tx1(x))
+  await Promise.all(txs)
 }
 
 async function setup(ethers, deployer, accounts) {
@@ -96,29 +115,26 @@ async function setup(ethers, deployer, accounts) {
   ))
   await ensureFinished(latestLiquidityPoolContract.runLiquidityPool())
   console.log("Done create perpetual")
-  await ensureFinished(mockUSDCContract.mint(masterAcc.address, "25000000" + "000000"))
-  await ensureFinished(latestLiquidityPoolContract.addLiquidity(toWei("25000000")))
+  await ensureFinished(mockUSDCContract.mint(masterAcc.address, "10000" + "000000"))
+  await ensureFinished(mockUSDCContract.connect(masterAcc).approve(latestLiquidityPoolContract.address, "10000" + "000000"))
 
   // disperse (
-  disperseContract = await deployer.deploy("Disperse")
+  await deployer.deploy("Disperse")
+  disperseContract = await deployer.getDeployedContract("Disperse")
+  await ensureFinished(mockUSDCContract.connect(masterAcc).approve(disperseContract.address, "10000" + "000000"))
   console.log("Done deploy disperseContract")
-  await ensureFinished(distribute(10,ethers))
+  await distribute(10,ethers)
 
-  // for (let i = 0; i < 10; i++) {
-  //   await ensureFinished(mockUSDCContract.connect(tradesWallet[0]).approve(latestLiquidityPoolContract.address, "25000000" + "000000"))
-  //   await ensureFinished(latestLiquidityPoolContract.setTargetLeverage(0, tradesWalletAdd[0], toWei("25")))
-  // }
+  // await ensureFinished(latestLiquidityPoolContract.connect(masterAcc).addLiquidity(toWei("1000"+"000000")))
+  // console.log("Done add liquidity")
+}
 
-  // readerContract = await deployer.deploy("Reader", poolCreator.address)
-  // var {cash, position} = await ensureFinished(readerContract.getMarginAccount(0, tradesWalletAdd[0]))
-  // const balance = await mockUSDCContract.methods.balanceOf(tradesWalletAdd[0]).call();
-  // console.log(cash.toString())
-  // console.log(position.toString())
-  // console.log(balance)
+async function benchmark(ethers, deployer, accounts) {
 }
 
 async function main(ethers, deployer, accounts) {
   await setup(ethers, deployer, accounts)
+  await benchmark(ethers, deployer, accounts)
 }
 
 ethers.getSigners()
