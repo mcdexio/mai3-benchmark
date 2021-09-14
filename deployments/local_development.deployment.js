@@ -2,14 +2,14 @@
   "SymbolService": {
     "type": "plain",
     "name": "SymbolService",
-    "address": "0x27428D83f50370acCd5bb174018f9B74F24f6eC2",
-    "deployedAt": 77
+    "address": "0x014Ec360DA262cbD59056FeFe95E7702dd2C31A2",
+    "deployedAt": 100
   },
   "PoolCreator": {
     "type": "plain",
     "name": "PoolCreator",
-    "address": "0x8008b6ED29f17596fCBFafD327148CE6f6681496",
-    "deployedAt": 79
+    "address": "0xdD3FFf1E0d4f3656113CaA1A11393D435A4a1880",
+    "deployedAt": 102
   },
   "AMMModule": {
     "type": "plain",
@@ -50,25 +50,25 @@
   "LiquidityPool": {
     "type": "plain",
     "name": "LiquidityPool",
-    "address": "0x8b7C68de128869F194dbbaBeE8c6d7BE922217b5",
-    "deployedAt": 88
+    "address": "0x414602B10e27AfD157F600657027a8d6BcD6d0f5",
+    "deployedAt": 105
   },
   "LpGovernor": {
     "type": "plain",
     "name": "LpGovernor",
-    "address": "0x615ecdccFe6aFb86352Bc4c8d19D17527Ad534B2",
-    "deployedAt": 89
+    "address": "0xaC5e0cBb78cE2c9F294A8D8518D4b9652478f4d2",
+    "deployedAt": 106
   },
   "MockUSDC": {
     "type": "plain",
     "name": "MockUSDC",
-    "address": "0xebB0966DDa3b1C85D78AA6dbB84cdaf827C52bcA",
-    "deployedAt": 91
+    "address": "0x3A411F4536786DB97c6F221c43A7a0C06381AAE4",
+    "deployedAt": 108
   },
   "OracleAdaptor": {
     "type": "plain",
     "name": "OracleAdaptor",
-    "address": "0x7e33d3c8ae8a6146D84c76C1d378e5eb0600B6FD",
-    "deployedAt": 93
+    "address": "0x57728900CC003e90752f911867b2c24D5eF639f9",
+    "deployedAt": 110
   }
 }
