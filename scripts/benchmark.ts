@@ -15,11 +15,14 @@ function toWei(n) { return hre.ethers.utils.parseEther(n) }
 
 const vaultFeeRate = toWei("0");
 const vault = "0x81183C9C61bdf79DB7330BBcda47Be30c0a85064"
+const USE_TARGET_LEVERAGE = 0x8000000;
+const NONE = "0x0000000000000000000000000000000000000000";
 let masterAcc;
 let traders = [];
 let mockUSDCContract;
 let disperseContract;
 let latestLiquidityPoolContract;
+let traderModuleContract;
 let readerContract;
 
 async function distribute(count: number, ethers) {
@@ -125,12 +128,21 @@ async function setup(ethers, deployer, accounts) {
   console.log("Done add liquidity")
 }
 
-async function benchmark(ethers, deployer, accounts) {
+async function benchmark() {
+  const startTime = Date.now()
+  console.log("start trader " + startTime)
+  const tradeFunc = async (trader) => {
+    latestLiquidityPoolContract.connect(trader).trade(0, trader.address, toWei("1"), toWei("100"), NONE, USE_TARGET_LEVERAGE);
+  }
+  const txs = traders.map(x => tradeFunc(x))
+  await Promise.all(txs)
+  const endTime = Date.now()
+  console.log("Done trade end " + endTime + " spend time " + (endTime-startTime)/1000)
 }
 
 async function main(ethers, deployer, accounts) {
   await setup(ethers, deployer, accounts)
-  await benchmark(ethers, deployer, accounts)
+  await benchmark(deployer)
 }
 
 ethers.getSigners()
