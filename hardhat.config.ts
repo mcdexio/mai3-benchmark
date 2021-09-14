@@ -17,12 +17,15 @@ module.exports = {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
-      allowUnlimitedContractSize: true
+      allowUnlimitedContractSize: true,
+    },
+    localhost: {
+      url: 'http://127.0.0.1:8545/',
     },
     local_development: {
       url: 'http://127.0.0.1:8547',
       accounts: [pk],
-    }
+    },
   },
   solidity: {
     version: "0.7.4",
