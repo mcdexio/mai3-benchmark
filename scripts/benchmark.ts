@@ -1,5 +1,4 @@
-import {expect} from "chai";
-
+const assert = require('assert')
 const hre = require("hardhat")
 const ethers = hre.ethers
 
@@ -83,19 +82,19 @@ async function main(ethers, deployer, accounts) {
   // post leverage
   await testTrade.updatePrice(now);
   await mocker.setPrice(toWei("100"));
-  await ctk.connect(wallets[0]).approve(testTrade.address, toWei("10"))
+  await ctk.connect(wallets[0]).approve(testTrade.address, toWei("10000"))
   const wallet0Address = await wallets[0].address
   await ctk.mint(wallet0Address, toWei("4"));
-  await testTrade.setTotalCollateral(0, toWei("1000"));
+  await testTrade.setTotalCollateral(0, toWei("100"));
   // 25x leverage
   await testTrade.setTargetLeverage(0, wallet0Address, toWei("25"));
   await testTrade.setMarginAccount(0, testTrade.address, toWei("10000"), toWei("0"));
   var { cash, position } = await testTrade.getMarginAccount(0, wallet0Address);
+  assert.equal(cash.toString(), "0")
+  assert.equal(position.toString(), "0")
 
-  // await testTrade.connect(wallets[0]).trade(0, wallet0Address, toWei("25"), toWei("100"), NONE, USE_TARGET_LEVERAGE);
-  // var { cash, position } = await testTrade.getMarginAccount(0, wallet0Address)
-  // console.log(cash.toString())
-  // console.log(position.toString())
+  await testTrade.connect(wallets[0]).trade(0, wallet0Address, toWei("1"), toWei("100"), NONE, USE_TARGET_LEVERAGE);
+  var { cash, position } = await testTrade.getMarginAccount(0, wallet0Address)
 
   // Synchronize func to triage liquidateByAmm
 }
