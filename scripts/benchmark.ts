@@ -142,7 +142,7 @@ async function benchmark() {
 
 async function main(ethers, deployer, accounts) {
   await setup(ethers, deployer, accounts)
-  await benchmark(deployer)
+  await benchmark()
 }
 
 ethers.getSigners()
