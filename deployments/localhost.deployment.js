@@ -2,14 +2,14 @@
   "SymbolService": {
     "type": "plain",
     "name": "SymbolService",
-    "address": "0x2B8F5e69C35c1Aff4CCc71458CA26c2F313c3ed3",
-    "deployedAt": 906
+    "address": "0x1E2e9190Cea3A97b5Aa85d9757117F499D31C47d",
+    "deployedAt": 931
   },
   "PoolCreator": {
     "type": "plain",
     "name": "PoolCreator",
-    "address": "0xA899118f4BCCb62F8c6A37887a4F450D8a4E92E0",
-    "deployedAt": 908
+    "address": "0x53DaB165b879542E9aDFC41c6474A9d797B9b042",
+    "deployedAt": 933
   },
   "AMMModule": {
     "type": "plain",
@@ -50,32 +50,32 @@
   "LiquidityPool": {
     "type": "plain",
     "name": "LiquidityPool",
-    "address": "0xF94AB55a20B32AC37c3A105f12dB535986697945",
-    "deployedAt": 911
+    "address": "0x6cD036fDBD89BaA51c8722Eec0B56CeEd301cC68",
+    "deployedAt": 936
   },
   "LpGovernor": {
     "type": "plain",
     "name": "LpGovernor",
-    "address": "0xBCF063A9eB18bc3C6eB005791C61801B7cB16fe4",
-    "deployedAt": 912
+    "address": "0x64386BC53c213F23C6960d3e080139A0f9Ef1733",
+    "deployedAt": 937
   },
   "CustomERC20": {
     "type": "plain",
     "name": "CustomERC20",
-    "address": "0x364C7188028348566E38D762f6095741c49f492B",
-    "deployedAt": 914
+    "address": "0x295129609d6876f5ECC62052Ba6bc082139A982c",
+    "deployedAt": 939
   },
   "OracleAdaptor": {
     "type": "plain",
     "name": "OracleAdaptor",
-    "address": "0xF2cb3cfA36Bfb95E0FD855C1b41Ab19c517FcDB9",
-    "deployedAt": 916
+    "address": "0x737b8F095E3c575a6Ae5FE1711AdB8F271E20269",
+    "deployedAt": 941
   },
   "Disperse": {
     "type": "plain",
     "name": "Disperse",
-    "address": "0x8659DF1C638CDA8E475CD3C6481730C2b4f85873",
-    "deployedAt": 923
+    "address": "0x427EE58a6c574032085AEB90Dd05dEea6F054930",
+    "deployedAt": 948
   },
   "Reader": {
     "type": "plain",

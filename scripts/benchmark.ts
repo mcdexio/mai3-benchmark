@@ -15,7 +15,7 @@ function toWei(n) { return hre.ethers.utils.parseEther(n) }
 
 const vaultFeeRate = toWei("0.001");
 const vault = "0x81183C9C61bdf79DB7330BBcda47Be30c0a85064"
-const USE_TARGET_LEVERAGE = 0x08000000;
+const USE_TARGET_LEVERAGE = 0x8000000;
 const NONE = "0x0000000000000000000000000000000000000000";
 let masterAcc;
 let traders = [];
