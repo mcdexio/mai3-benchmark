@@ -131,13 +131,13 @@ async function setup(ethers, deployer, accounts) {
 async function benchmark() {
   const startTime = Date.now()
   console.log("start trader " + startTime)
-  const tradeFunc = async (trader) => {
-    latestLiquidityPoolContract.connect(trader).trade(0, trader.address, toWei("1"), toWei("100"), NONE, USE_TARGET_LEVERAGE);
-  }
-  const txs = traders.map(x => tradeFunc(x))
+  const txs = traders.map(x => latestLiquidityPoolContract.connect(x).trade(0, x.address, toWei("1"), toWei("100"), NONE, USE_TARGET_LEVERAGE))
   await Promise.all(txs)
-  const endTime = Date.now()
-  console.log("Done trade end " + endTime + " spend time " + (endTime-startTime)/1000)
+  const end1Time = Date.now()
+  console.log("Done trade end " + end1Time + " spend time " + (end1Time-startTime)/1000)
+  await Promise.all(txs.map(x => x.wait()))
+  const end2Time = Date.now()
+  console.log("Done trade end " + end2Time + " spend time " + (end2Time-startTime)/1000)
 }
 
 async function main(ethers, deployer, accounts) {
