@@ -45,15 +45,11 @@ async function distribute(count: number, ethers) {
   )
   const endTime = Date.now()
   console.log("Done distribute end " + endTime + " spend time " + (endTime-startTime)/1000)
-  let txs = []
   const tx = async (trader) => {
-    txs.push(await mockUSDCContract.connect(trader).approve(latestLiquidityPoolContract.address, "100" + "000000"))
+    await mockUSDCContract.connect(trader).approve(latestLiquidityPoolContract.address, "100" + "000000")
+    await latestLiquidityPoolContract.connect(trader).setTargetLeverage(0, trader.address, toWei("25"))
   }
-  traders.map(x => tx(x))
-  const tx1 = async (trader) => {
-    txs.push(await latestLiquidityPoolContract.connect(trader).setTargetLeverage(0, trader.address, toWei("25")))
-  }
-  traders.map(x => tx1(x))
+  const txs = traders.map(x => tx(x))
   await Promise.all(txs)
 }
 
@@ -125,8 +121,8 @@ async function setup(ethers, deployer, accounts) {
   console.log("Done deploy disperseContract")
   await distribute(10,ethers)
 
-  // await ensureFinished(latestLiquidityPoolContract.connect(masterAcc).addLiquidity(toWei("1000"+"000000")))
-  // console.log("Done add liquidity")
+  await ensureFinished(latestLiquidityPoolContract.connect(masterAcc).addLiquidity("1000"+"000000"))
+  console.log("Done add liquidity")
 }
 
 async function benchmark(ethers, deployer, accounts) {
