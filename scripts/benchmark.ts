@@ -1,17 +1,9 @@
-const assert = require('assert')
 const hre = require("hardhat")
 const ethers = hre.ethers
 
 import { DeploymentOptions } from './deployer/deployer'
-import {readOnlyEnviron } from "./deployer/environ";
-import {printError} from "./deployer/utils";
-import {
-  toWei,
-  createContract
-} from "./utils"
-
-const USE_TARGET_LEVERAGE = 0x8000000;
-const NONE = "0x0000000000000000000000000000000000000000";
+import {readOnlyEnviron, restorableEnviron} from "./deployer/environ";
+import {ensureFinished, printError} from "./deployer/utils";
 
 const ENV: DeploymentOptions = {
   network: hre.network.name,
@@ -19,88 +11,118 @@ const ENV: DeploymentOptions = {
   addressOverride: {},
 }
 
-async function distribute(count: number, ethers, master) {
-  // distribute 1 eth to 1000 accounts
-  const wallets = []
-  const waits = []
+function toWei(n) { return hre.ethers.utils.parseEther(n) }
+
+const vaultFeeRate = toWei("0");
+const vault = "0x81183C9C61bdf79DB7330BBcda47Be30c0a85064"
+let masterAcc;
+let tradesWallet = [];
+let tradesWalletAdd = [];
+let mockUSDCContract;
+let disperseContract;
+let latestLiquidityPoolContract;
+let readerContract;
+
+async function distribute(count: number, ethers) {
   for (let i = 0; i < count; i++) {
     // need to connect to provider
     const newWallet = ethers.Wallet.createRandom().connect(ethers.provider)
-    const tx = {
-      to: newWallet.address,
-      value: ethers.utils.parseEther('1'),
-    }
-    const send = await master.sendTransaction(tx)
-    wallets.push(newWallet)
-    waits.push(send.wait())
+    const add = await newWallet.address
+    tradesWallet.push(newWallet)
+    tradesWalletAdd.push(add)
+    await ensureFinished(mockUSDCContract.mint(add, "25000000" + "000000"))
+    await ensureFinished(mockUSDCContract.approve(latestLiquidityPoolContract.address, "25000000" + "000000"))
   }
-  await Promise.all(waits)
+  // distribute 1 eth to count of accounts
+  disperseContract.disperseEther(tradesWalletAdd, toWei("1"))
   console.log("Done distribute")
-  return wallets
+}
+
+async function setup(ethers, deployer, accounts) {
+  console.log("start setup")
+  masterAcc = accounts[0]
+  // symbolService
+  await deployer.deploy("SymbolService")
+  const symbolService = await deployer.getDeployedContract("SymbolService")
+  await ensureFinished(symbolService.initialize(10000))
+  console.log("Done deploy SymbolService")
+
+  // PoolCreator
+  await deployer.deploy("PoolCreator")
+  const poolCreator = await deployer.getDeployedContract("PoolCreator")
+  console.log("Done deploy PoolCreator")
+  await ensureFinished(poolCreator.initialize(
+    deployer.addressOf("SymbolService"),
+    vault,
+    vaultFeeRate
+  ))
+  await ensureFinished(symbolService.addWhitelistedFactory(poolCreator.address))
+
+  // LiquidityPool
+  const liquidityPool = await deployer.deploy("LiquidityPool")
+  const governor = await deployer.deploy("LpGovernor")
+  console.log("Done deploy liquidityPool, governor")
+  await ensureFinished(poolCreator.addVersion(liquidityPool.address, governor.address, 0, "initial version"))
+
+  // deploy mock erc20
+  mockUSDCContract = await deployer.deploy("CustomERC20", "MockUSDC", "MockUSDC", 6)
+  console.log("Done deploy mockUSDCContract")
+  await ensureFinished(poolCreator.createLiquidityPool(
+    mockUSDCContract.address,
+    6,
+    Math.floor(Date.now() / 1000),
+    ethers.utils.defaultAbiCoder.encode(["bool", "int256"], [false, toWei("10000000")])
+  ))
+
+  // deploy oracle
+  const oracle = await deployer.deploy("OracleAdaptor", "USD", "ETH")
+  console.log("Done deploy oracleAdaptor")
+  let now = Math.floor(Date.now() / 1000);
+  await ensureFinished(oracle.setIndexPrice(toWei("100"), now))
+  await ensureFinished(oracle.setMarkPrice(toWei("100"), now))
+
+  // createPerpetual
+  const n = await poolCreator.getLiquidityPoolCount();
+  const allLiquidityPools = await poolCreator.listLiquidityPools(0, n.toString());
+  latestLiquidityPoolContract = await deployer.getContractAt("LiquidityPool", allLiquidityPools[allLiquidityPools.length - 1]);
+  await ensureFinished(latestLiquidityPoolContract.createPerpetual(
+    oracle.address,
+    // imr          mmr            operatorfr        lpfr              rebate        penalty        keeper       insur         oi
+    [toWei("0.04"), toWei("0.03"), toWei("0.00010"), toWei("0.00055"), toWei("0.2"), toWei("0.01"), toWei("10"), toWei("0.5"), toWei("3")],
+    // alpha           beta1            beta2             frLimit        lev         maxClose       frFactor        defaultLev
+    [toWei("0.00075"), toWei("0.0075"), toWei("0.00525"), toWei("0.01"), toWei("1"), toWei("0.05"), toWei("0.005"), toWei("10")],
+    [toWei("0"),       toWei("0"),      toWei("0"),       toWei("0"),    toWei("0"), toWei("0"),    toWei("0"),     toWei("0")],
+    [toWei("0.1"),     toWei("0.5"),    toWei("0.5"),     toWei("0.1"),  toWei("5"), toWei("1"),    toWei("0.1"),   toWei("10000000")]
+  ))
+  await ensureFinished(latestLiquidityPoolContract.runLiquidityPool())
+  console.log("Done create perpetual")
+  await ensureFinished(mockUSDCContract.mint(masterAcc.address, "25000000" + "000000"))
+  await ensureFinished(latestLiquidityPoolContract.addLiquidity(toWei("25000000")))
+
+  // disperse (
+  disperseContract = await deployer.deploy("Disperse")
+  console.log("Done deploy disperseContract")
+  await ensureFinished(distribute(10,ethers))
+
+  // for (let i = 0; i < 10; i++) {
+  //   await ensureFinished(mockUSDCContract.connect(tradesWallet[0]).approve(latestLiquidityPoolContract.address, "25000000" + "000000"))
+  //   await ensureFinished(latestLiquidityPoolContract.setTargetLeverage(0, tradesWalletAdd[0], toWei("25")))
+  // }
+
+  // readerContract = await deployer.deploy("Reader", poolCreator.address)
+  // var {cash, position} = await ensureFinished(readerContract.getMarginAccount(0, tradesWalletAdd[0]))
+  // const balance = await mockUSDCContract.methods.balanceOf(tradesWalletAdd[0]).call();
+  // console.log(cash.toString())
+  // console.log(position.toString())
+  // console.log(balance)
 }
 
 async function main(ethers, deployer, accounts) {
-  const vault = "0x81183C9C61bdf79DB7330BBcda47Be30c0a85064"
-  const masterAddress = await accounts[0].address
-  // distribute ETH to others
-  const wallets = await distribute(10, ethers, accounts[0])
-
-  // deploy contract & setup
-  const ctk = await createContract("CustomERC20", ["collateral", "CTK", 18]);
-  const oracle = await createContract("OracleAdaptor", ["ctk", "ctk"]);
-  let now = Math.floor(Date.now() / 1000);
-  await oracle.setMarkPrice(toWei("100"), now);
-  await oracle.setIndexPrice(toWei("100"), now);
-  const AMMModule = await createContract("AMMModule");
-  const CollateralModule = await createContract("CollateralModule")
-  const PerpetualModule = await createContract("PerpetualModule");
-  const OrderModule = await createContract("OrderModule");
-  const LiquidityPoolModule = await createContract("LiquidityPoolModule", [], { CollateralModule, AMMModule, PerpetualModule });
-  const MockAMMModule = await createContract("MockAMMModule");
-  const TradeModule = await createContract("TradeModule", [], { AMMModule: MockAMMModule, LiquidityPoolModule });
-  const testTrade = await createContract("TestTrade", [], {
-    PerpetualModule,
-    CollateralModule,
-    LiquidityPoolModule,
-    OrderModule,
-    TradeModule,
-  });
-  await testTrade.createPerpetual(
-    oracle.address,
-    // imr         mmr            operatorfr       lpfr             rebate      penalty         keeper      insur       oi
-    [toWei("0.1"), toWei("0.05"), toWei("0.0001"), toWei("0.0007"), toWei("0"), toWei("0.005"), toWei("1"), toWei("0"), toWei("1")],
-    [toWei("0.01"), toWei("0.1"), toWei("0.06"), toWei("0"), toWei("5"), toWei("0.2"), toWei("0.01"), toWei("1")],
-  )
-  await testTrade.setOperator(masterAddress)
-  await testTrade.setVault(vault, toWei("0.0002"))
-  await testTrade.setCollateralToken(ctk.address, 18);
-  await ctk.mint(testTrade.address, toWei("10000000000"));
-  const mocker = await createContract("MockAMMPriceEntries");
-  await testTrade.setGovernor(mocker.address);
-  await testTrade.setState(0, 2); // set PerpetualState to normal
-
-  // post leverage
-  await testTrade.updatePrice(now);
-  await mocker.setPrice(toWei("100"));
-  await ctk.connect(wallets[0]).approve(testTrade.address, toWei("10000"))
-  const wallet0Address = await wallets[0].address
-  await ctk.mint(wallet0Address, toWei("4"));
-  await testTrade.setTotalCollateral(0, toWei("100"));
-  // 25x leverage
-  await testTrade.setTargetLeverage(0, wallet0Address, toWei("25"));
-  await testTrade.setMarginAccount(0, testTrade.address, toWei("10000"), toWei("0"));
-  var { cash, position } = await testTrade.getMarginAccount(0, wallet0Address);
-  assert.equal(cash.toString(), "0")
-  assert.equal(position.toString(), "0")
-
-  await testTrade.connect(wallets[0]).trade(0, wallet0Address, toWei("1"), toWei("100"), NONE, USE_TARGET_LEVERAGE);
-  var { cash, position } = await testTrade.getMarginAccount(0, wallet0Address)
-
-  // Synchronize func to triage liquidateByAmm
+  await setup(ethers, deployer, accounts)
 }
 
 ethers.getSigners()
-  .then(accounts => readOnlyEnviron(ethers, ENV, main, accounts))
+  .then(accounts => restorableEnviron(ethers, ENV, main, accounts))
   .then(() => process.exit(0))
   .catch(error => {
     printError(error);
