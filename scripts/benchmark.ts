@@ -321,13 +321,13 @@ async function liquidateBenchmark() {
   await ensureFinished(oracleContract.setMarkPrice(toWei("98.95"), now));
   await ensureFinished(latestLiquidityPoolContract.connect(masterAcc).addAMMKeeper(0,  masterAcc.address))
 
-  const ops = async (x) => {
-    return await ensureFinished(latestLiquidityPoolContract.connect(masterAcc).liquidateByAMM(0, x.address))
-  }
-
   const startTime = Date.now();
   console.log("start liquidate " + startTime);
-  const txs = await Promise.all(traders.map((trader) => ops(trader)));
+  const waits = []
+  for (let i = 0; i < traders.length; i += 1) {
+    const send = await latestLiquidityPoolContract.connect(masterAcc).liquidateByAMM(0, traders[i].address)
+    waits.push(send)
+  }
   const end1Time = Date.now();
   console.log(
     "End Sent Liquidate",
@@ -338,7 +338,7 @@ async function liquidateBenchmark() {
     traders.length,
     "trader"
   );
-  const receipts = await Promise.all(txs.map((x) => x.wait()));
+  const receipts = await Promise.all(waits.map(x => x.wait()));
   const end2Time = Date.now();
   console.log(
     "End liquidate",
