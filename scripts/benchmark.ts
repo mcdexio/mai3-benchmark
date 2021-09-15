@@ -17,7 +17,7 @@ function toWei(n) {
   return hre.ethers.utils.parseEther(n);
 }
 
-const COUNT = 10;
+const COUNT = 1;
 const vaultFeeRate = toWei("0.00015");
 const vault = "0x81183C9C61bdf79DB7330BBcda47Be30c0a85064";
 const USE_TARGET_LEVERAGE = 0x8000000;
@@ -26,13 +26,14 @@ const BATCH_SIZE = 10;
 const USDC_PER_TRADER = new BigNumber("1000").shiftedBy(6);
 const ETH_PER_TRADER = new BigNumber("1").shiftedBy(18);
 const TRADER_LEVERAGE = new BigNumber("10").shiftedBy(18);
+const POSITION_LEVERAGE = new BigNumber("25").shiftedBy(18);
 let masterAcc;
 let traders = [];
 let mockUSDCContract;
 let disperseContract;
 let latestLiquidityPoolContract;
-let poolCreatorContract;
 let poolGetterContract;
+let oracleContract;
 
 async function distribute(count: number, ethers) {
   let totalUSDC = USDC_PER_TRADER.times(count);
@@ -95,7 +96,7 @@ async function setup(ethers, deployer, accounts) {
   console.log("Done deploy SymbolService");
 
   // PoolCreator
-  poolCreatorContract = await ensureFinished(deployer.deploy("PoolCreator"));
+  const poolCreatorContract = await ensureFinished(deployer.deploy("PoolCreator"));
   console.log("Done deploy PoolCreator");
   await ensureFinished(
     poolCreatorContract.initialize(
@@ -104,11 +105,8 @@ async function setup(ethers, deployer, accounts) {
       vaultFeeRate
     )
   );
-  const poolCreatorUpgradeAdmin =
-    await poolCreatorContract.callStatic.upgradeAdmin();
-  await ensureFinished(
-    symbolService.addWhitelistedFactory(poolCreatorContract.address)
-  );
+  const poolCreatorUpgradeAdmin = await poolCreatorContract.callStatic.upgradeAdmin();
+  await ensureFinished(symbolService.addWhitelistedFactory(poolCreatorContract.address));
 
   // LiquidityPool
   const liquidityPool = await deployer.deploy("LiquidityPool");
@@ -144,11 +142,11 @@ async function setup(ethers, deployer, accounts) {
   );
 
   // deploy oracle
-  const oracle = await deployer.deploy("OracleAdaptor", "USD", "ETH");
+  oracleContract = await deployer.deploy("OracleAdaptor", "USD", "ETH");
   console.log("Done deploy oracleAdaptor");
   let now = Math.floor(Date.now() / 1000);
-  await ensureFinished(oracle.setIndexPrice(toWei("100"), now));
-  await ensureFinished(oracle.setMarkPrice(toWei("100"), now));
+  await ensureFinished(oracleContract.setIndexPrice(toWei("100"), now));
+  await ensureFinished(oracleContract.setMarkPrice(toWei("100"), now));
 
   // createPerpetual
   const n = await poolCreatorContract.getLiquidityPoolCount();
@@ -163,11 +161,10 @@ async function setup(ethers, deployer, accounts) {
   console.log("LiquidityPool " + latestLiquidityPoolContract.address);
   await ensureFinished(
     latestLiquidityPoolContract.createPerpetual(
-      oracle.address,
-      // 10 leverage
+      oracleContract.address,
       [
-        toWei("0.1"),
-        toWei("0.05"),
+        toWei("0.04"),
+        toWei("0.03"),
         toWei("0.001"),
         toWei("0.001"),
         toWei("0.2"),
@@ -210,9 +207,7 @@ async function setup(ethers, deployer, accounts) {
   );
   await ensureFinished(latestLiquidityPoolContract.runLiquidityPool());
   console.log("Done create perpetual");
-  await ensureFinished(
-    mockUSDCContract.mint(masterAcc.address, "25000000" + "000000")
-  );
+  await ensureFinished(mockUSDCContract.mint(masterAcc.address, "25000000" + "000000"));
   await ensureFinished(
     mockUSDCContract
       .connect(masterAcc)
@@ -239,17 +234,18 @@ async function tradeBenchmark(deployer) {
       .trade(
         0,
         x.address,
-        toWei("10"),
+        POSITION_LEVERAGE.toFixed(),
         toWei("510"),
         Math.floor(Date.now() / 1000) + 999999,
         NONE,
-        USE_TARGET_LEVERAGE
+        USE_TARGET_LEVERAGE,
+        // { gaslimit: 4e6 }
       );
   };
   const txs = await Promise.all(traders.map((trader) => ops(trader)));
   const end1Time = Date.now();
   console.log(
-    "End Sent",
+    "End Sent Trade",
     (end1Time - startTime) / 1000,
     "tps",
     (traders.length / (end1Time - startTime)) * 1000,
@@ -279,12 +275,11 @@ async function tradeBenchmark(deployer) {
     latestLiquidityPoolContract.address
   );
   for (let trader of traders) {
-    const { position, isMarginSafe } =
-      await poolGetterContract.getMarginAccount(0, trader.address);
-    assert.equal(isMarginSafe, true);
+    const { position, isMaintenanceMarginSafe } = await poolGetterContract.getMarginAccount(0, trader.address);
+    assert.equal(isMaintenanceMarginSafe, true);
     assert.equal(
       position,
-      TRADER_LEVERAGE.toFixed(),
+      POSITION_LEVERAGE.toFixed(),
       `trader ${trader.address}'s position ${position}`
     );
   }
@@ -318,12 +313,57 @@ async function preTrade() {
   );
 }
 
+async function liquidateBenchmark() {
+  let now = Math.floor(Date.now() / 1000);
+  await ensureFinished(oracleContract.setIndexPrice(toWei("90"), now));
+  await ensureFinished(oracleContract.setMarkPrice(toWei("90"), now));
+  await ensureFinished(latestLiquidityPoolContract.connect(masterAcc).addAMMKeeper(0,  masterAcc.address))
+
+  const ops = async (x) => {
+    return latestLiquidityPoolContract.connect(masterAcc).liquidateByAMM(0, x.address)
+  }
+
+  const startTime = Date.now();
+  console.log("start liquidate " + startTime);
+  const txs = await Promise.all(traders.map((trader) => ops(trader)));
+  const end1Time = Date.now();
+  console.log(
+    "End Sent Liquidate",
+    (end1Time - startTime) / 1000,
+    "tps",
+    (traders.length / (end1Time - startTime)) * 1000,
+    " of ",
+    traders.length,
+    "trader"
+  );
+  const receipts = await Promise.all(txs.map((x) => x.wait()));
+  const end2Time = Date.now();
+  console.log(
+    "End liquidate",
+    (end2Time - startTime) / 1000,
+    "tps",
+    (traders.length / (end2Time - startTime)) * 1000,
+    " of ",
+    traders.length,
+    "trader"
+  )
+  for (let receipt of receipts) {
+    if (receipt.status !== 1) {
+      throw new Error("receipt error:" + receipt);
+    }
+  }
+  for (let trader of traders) {
+    const {isMaintenanceMarginSafe} = await poolGetterContract.getMarginAccount(0, trader.address);
+    assert.equal(isMaintenanceMarginSafe, false);
+  }
+}
+
 async function main(ethers, deployer, accounts) {
   await setup(ethers, deployer, accounts);
   await distribute(COUNT, ethers);
   await preTrade();
   await tradeBenchmark(deployer);
-  // await liquidateBenchmark()
+  await liquidateBenchmark()
 }
 
 ethers
