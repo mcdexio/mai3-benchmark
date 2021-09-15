@@ -1,3 +1,3 @@
 [submodule "arbitrum"]
 	path = arbitrum
-	url = git@github.com:champfu-mcdex/arbitrum.git
+	url = https://github.com/champfu-mcdex/arbitrum.git
