@@ -17,7 +17,7 @@ function toWei(n) {
   return hre.ethers.utils.parseEther(n);
 }
 
-const COUNT = 1;
+const COUNT = 10;
 const vaultFeeRate = toWei("0.00015");
 const vault = "0x81183C9C61bdf79DB7330BBcda47Be30c0a85064";
 const USE_TARGET_LEVERAGE = 0x8000000;
@@ -25,7 +25,7 @@ const NONE = "0x0000000000000000000000000000000000000000";
 const BATCH_SIZE = 10;
 const USDC_PER_TRADER = new BigNumber("1000").shiftedBy(6);
 const ETH_PER_TRADER = new BigNumber("1").shiftedBy(18);
-const TRADER_LEVERAGE = new BigNumber("10").shiftedBy(18);
+const TRADER_LEVERAGE = new BigNumber("25").shiftedBy(18);
 const POSITION_LEVERAGE = new BigNumber("25").shiftedBy(18);
 let masterAcc;
 let traders = [];
@@ -235,7 +235,7 @@ async function tradeBenchmark(deployer) {
         0,
         x.address,
         POSITION_LEVERAGE.toFixed(),
-        toWei("510"),
+        toWei("110"),
         Math.floor(Date.now() / 1000) + 999999,
         NONE,
         USE_TARGET_LEVERAGE,
@@ -275,8 +275,10 @@ async function tradeBenchmark(deployer) {
     latestLiquidityPoolContract.address
   );
   for (let trader of traders) {
-    const { position, isMaintenanceMarginSafe } = await poolGetterContract.getMarginAccount(0, trader.address);
-    assert.equal(isMaintenanceMarginSafe, true);
+    const { cash, margin, position, isMarginSafe } = await poolGetterContract.getMarginAccount(0, trader.address);
+    assert.equal(cash.toString(), '-2400' + '000000000000000000') // - 25*100(pos*price) + 25*100*0.04
+    assert.equal(margin.toString(), '100' + '000000000000000000') // 25*100*0.04 (pos*price*leverage)
+    assert.equal(isMarginSafe, true);
     assert.equal(
       position,
       POSITION_LEVERAGE.toFixed(),
@@ -294,7 +296,6 @@ async function preTrade() {
         .connect(trader)
         .approve(latestLiquidityPoolContract.address, USDC_PER_TRADER.toFixed())
     );
-    // align createPerpetual 10 leverage
     await ensureFinished(
       latestLiquidityPoolContract
         .connect(trader)
@@ -315,8 +316,9 @@ async function preTrade() {
 
 async function liquidateBenchmark() {
   let now = Math.floor(Date.now() / 1000);
-  await ensureFinished(oracleContract.setIndexPrice(toWei("90"), now));
-  await ensureFinished(oracleContract.setMarkPrice(toWei("90"), now));
+  // -2400 (cash) + p*25 (pos*leverage) < p*25*0.03 => 98.9690721649
+  await ensureFinished(oracleContract.setIndexPrice(toWei("98.95"), now));
+  await ensureFinished(oracleContract.setMarkPrice(toWei("98.95"), now));
   await ensureFinished(latestLiquidityPoolContract.connect(masterAcc).addAMMKeeper(0,  masterAcc.address))
 
   const ops = async (x) => {
@@ -353,8 +355,8 @@ async function liquidateBenchmark() {
     }
   }
   for (let trader of traders) {
-    const {isMaintenanceMarginSafe} = await poolGetterContract.getMarginAccount(0, trader.address);
-    assert.equal(isMaintenanceMarginSafe, false);
+    const {isMarginSafe} = await poolGetterContract.getMarginAccount(0, trader.address);
+    assert.equal(isMarginSafe, true); // didn't bankrupt
   }
 }
 
