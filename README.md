@@ -9,8 +9,9 @@
 2. yarn
 3. yarn build
 ## build geth
-1. yarn docker:build:geth
-2. yarn docker:geth
+1. add private key (.env) to arbitrum/packages/arb-bridge-eth
+2. yarn docker:build:geth
+3. yarn docker:geth
    1. will create bridge_eth_addresses.json under arbitrum/packages/arb-bridge-eth
 ## build arbitrum
 1. yarn demo:initialize [--force=true]
