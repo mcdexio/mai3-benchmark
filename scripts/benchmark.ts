@@ -322,7 +322,7 @@ async function liquidateBenchmark() {
   await ensureFinished(latestLiquidityPoolContract.connect(masterAcc).addAMMKeeper(0,  masterAcc.address))
 
   const ops = async (x) => {
-    return latestLiquidityPoolContract.connect(masterAcc).liquidateByAMM(0, x.address)
+    return await ensureFinished(latestLiquidityPoolContract.connect(masterAcc).liquidateByAMM(0, x.address))
   }
 
   const startTime = Date.now();
