@@ -28,4 +28,4 @@
 # deploy mai-protocol-v3
 1. cd mai3-benchmark
 2. yarn
-3. yarn deploy-from-scratch
+3. yarn benchmark

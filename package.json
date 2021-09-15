@@ -21,7 +21,7 @@
   "scripts": {
     "remove-whitelist": "yarn workspace arbitrum remove-whitelist",
     "deposit": "yarn workspace arbitrum deposit",
-    "deploy-from-scratch": "hardhat --network local_development run scripts/deployFromScratch.ts"
+    "benchmark": "hardhat --network local_development run scripts/benchmark.ts"
   },
   "repository": {
     "type": "git",
