@@ -145,7 +145,24 @@ export class Deployer {
 
   public async getContractAt(contractName: string, address: string): Promise<any> {
     const factory = await this._getFactory(contractName);
-    return await factory.attach(address);
+    const deployed = await factory.attach(address)
+    this._logDeployment(contractName, deployed)
+    if (contractName in this.deployedContracts) {
+      const name = `${contractName}_${address}`
+      this.deployedContracts[name] = {
+        type: "plain",
+        name: contractName,
+        address: deployed.address,
+      };
+    } else {
+      // not in deployedContract, just save
+      this.deployedContracts[contractName] = {
+        type: "plain",
+        name: contractName,
+        address: deployed.address,
+      };
+    }
+    return deployed;
   }
 
   public async getFactory(contractName: string): Promise<any> {
