@@ -17,7 +17,7 @@
 1. yarn demo:initialize [--force=true]
    1. will depend on arbitrum/packages/arb-bridge-eth/bridge_eth_address.json
 2. yarn demo:deploy
-   1. maybe `sudo chown -R 1000:1000 rollups/`
+   1. if fail, `sudo chown -R 1000:1000 rollups/`
 ## remove whitelist
 1. yarn remove-whitelist
    1. rollupOwn call rollup admin（rollupAddress)'s updateWhitelistConsumers
