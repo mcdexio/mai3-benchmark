@@ -54,7 +54,7 @@ async function distribute(count: number, ethers) {
     traders.push(newWallet);
   }
   const startTime = Date.now();
-  console.log("start distribute " + startTime);
+  console.log("Start distribute time: " + startTime);
   for (let i = 0; i < traders.length; i += BATCH_SIZE) {
     const batch = traders.slice(i, i + BATCH_SIZE);
     totalUSDC = USDC_PER_TRADER.times(BATCH_SIZE);
@@ -79,7 +79,7 @@ async function distribute(count: number, ethers) {
 
   const endTime = Date.now();
   console.log(
-    "End distribute " +
+    "End distribute time " +
       endTime +
       " spend time " +
       (endTime - startTime) / 1000 +
@@ -227,7 +227,7 @@ async function setup(ethers, deployer, accounts) {
 
 async function tradeBenchmark(deployer) {
   const startTime = Date.now();
-  console.log("start trader " + startTime);
+  console.log("Start trader time:", startTime);
   const ops = async (x) => {
     return latestLiquidityPoolContract
       .connect(x)
@@ -244,25 +244,18 @@ async function tradeBenchmark(deployer) {
   };
   const txs = await Promise.all(traders.map((trader) => ops(trader)));
   const end1Time = Date.now();
+
   console.log(
-    "End Sent Trade",
-    (end1Time - startTime) / 1000,
-    "tps",
-    (traders.length / (end1Time - startTime)) * 1000,
-    " of ",
-    traders.length,
-    "trader"
+    `End Sent Trade time: ${end1Time},`,
+    `Spend: ${(end1Time-startTime)/1000}s,`,
+    `Tps: ${traders.length / (end1Time-startTime)*1000} of ${traders.length} traders.`,
   );
   const receipts = await Promise.all(txs.map((x) => x.wait()));
   const end2Time = Date.now();
   console.log(
-    "End trade",
-    (end2Time - startTime) / 1000,
-    "tps",
-    (traders.length / (end2Time - startTime)) * 1000,
-    " of ",
-    traders.length,
-    "trader"
+    `End Trade time: ${end2Time},`,
+    `Spend: ${(end2Time-startTime)/1000}s,`,
+    `Tps: ${traders.length / (end2Time-startTime)*1000} of ${traders.length} traders.`,
   );
   for (let receipt of receipts) {
     if (receipt.status !== 1) {
@@ -275,10 +268,10 @@ async function tradeBenchmark(deployer) {
     latestLiquidityPoolContract.address
   );
   for (let trader of traders) {
-    const { cash, margin, position, isMarginSafe } = await poolGetterContract.getMarginAccount(0, trader.address);
+    const { cash, margin, position, isMaintenanceMarginSafe } = await poolGetterContract.callStatic.getMarginAccount(0, trader.address);
     assert.equal(cash.toString(), '-2400' + '000000000000000000') // - 25*100(pos*price) + 25*100*0.04
     assert.equal(margin.toString(), '100' + '000000000000000000') // 25*100*0.04 (pos*price*leverage)
-    assert.equal(isMarginSafe, true);
+    assert.equal(isMaintenanceMarginSafe, true);
     assert.equal(
       position,
       POSITION_LEVERAGE.toFixed(),
@@ -320,9 +313,15 @@ async function liquidateBenchmark() {
   await ensureFinished(oracleContract.setIndexPrice(toWei("98.95"), now));
   await ensureFinished(oracleContract.setMarkPrice(toWei("98.95"), now));
   await ensureFinished(latestLiquidityPoolContract.connect(masterAcc).addAMMKeeper(0,  masterAcc.address))
+  await ensureFinished(latestLiquidityPoolContract.forceToSyncState()) // liquidityPool sync
+
+  for (let trader of traders) {
+    const {isMaintenanceMarginSafe} = await poolGetterContract.callStatic.getMarginAccount(0, trader.address);
+    assert.equal(isMaintenanceMarginSafe, false); // because price is too low
+  }
 
   const startTime = Date.now();
-  console.log("start liquidate " + startTime);
+  console.log("Start liquidate time:", startTime);
   const waits = []
   for (let i = 0; i < traders.length; i += 1) {
     const send = await latestLiquidityPoolContract.connect(masterAcc).liquidateByAMM(0, traders[i].address)
@@ -330,24 +329,16 @@ async function liquidateBenchmark() {
   }
   const end1Time = Date.now();
   console.log(
-    "End Sent Liquidate",
-    (end1Time - startTime) / 1000,
-    "tps",
-    (traders.length / (end1Time - startTime)) * 1000,
-    " of ",
-    traders.length,
-    "trader"
+    `End Sent liquidate time: ${end1Time},`,
+    `Spend: ${(end1Time-startTime)/1000}s,`,
+    `Tps: ${traders.length / (end1Time-startTime)*1000} of ${traders.length} traders.`,
   );
   const receipts = await Promise.all(waits.map(x => x.wait()));
   const end2Time = Date.now();
   console.log(
-    "End liquidate",
-    (end2Time - startTime) / 1000,
-    "tps",
-    (traders.length / (end2Time - startTime)) * 1000,
-    " of ",
-    traders.length,
-    "trader"
+    `End liquidate time: ${end2Time},`,
+    `Spend: ${(end2Time-startTime)/1000}s,`,
+    `Tps: ${traders.length / (end2Time-startTime)*1000} of ${traders.length} traders.`,
   )
   for (let receipt of receipts) {
     if (receipt.status !== 1) {
@@ -355,8 +346,8 @@ async function liquidateBenchmark() {
     }
   }
   for (let trader of traders) {
-    const {isMarginSafe} = await poolGetterContract.getMarginAccount(0, trader.address);
-    assert.equal(isMarginSafe, true); // didn't bankrupt
+    const {isMaintenanceMarginSafe} = await poolGetterContract.getMarginAccount(0, trader.address);
+    assert.equal(isMaintenanceMarginSafe, true); // didn't bankrupt
   }
 }
 
