@@ -25,7 +25,8 @@
       2. 0x0000000000000000000000000000000000000000
       3. ["inboxAddress"]
 ## deposit
-1. npx hardhat --network local_development deposit inbox_address private_key dest_address amount(wei)
+1. yarn deposit inbox_address private_key dest_address amount(wei)
+   1. npx hardhat --network local_development deposit inbox_address private_key dest_address amount(wei)
 
 # deploy mai-protocol-v3
 1. cd mai3-benchmark
