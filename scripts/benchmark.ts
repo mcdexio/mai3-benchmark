@@ -17,7 +17,7 @@ function toWei(n) {
   return hre.ethers.utils.parseEther(n);
 }
 
-const COUNT = 10;
+const COUNT = 3;
 const vaultFeeRate = toWei("0.00015");
 const vault = "0x81183C9C61bdf79DB7330BBcda47Be30c0a85064";
 const USE_TARGET_LEVERAGE = 0x8000000;
@@ -313,6 +313,9 @@ async function liquidateBenchmark() {
   await ensureFinished(oracleContract.setIndexPrice(toWei("98.95"), now));
   await ensureFinished(oracleContract.setMarkPrice(toWei("98.95"), now));
   await ensureFinished(latestLiquidityPoolContract.connect(masterAcc).addAMMKeeper(0,  masterAcc.address))
+  for (let i = 0; i < traders.length; i++) {
+    await ensureFinished(latestLiquidityPoolContract.connect(masterAcc).addAMMKeeper(0,  traders[i].address))
+  }
   await ensureFinished(latestLiquidityPoolContract.forceToSyncState()) // liquidityPool sync
 
   for (let trader of traders) {
@@ -323,17 +326,22 @@ async function liquidateBenchmark() {
   const startTime = Date.now();
   console.log("Start liquidate time:", startTime);
   const waits = []
+  // trader i is liquidated by i+1
   for (let i = 0; i < traders.length; i += 1) {
-    const send = await latestLiquidityPoolContract.connect(masterAcc).liquidateByAMM(0, traders[i].address)
-    waits.push(send)
+    if (i + 1 == traders.length) {
+      waits.push(latestLiquidityPoolContract.connect(masterAcc).liquidateByAMM(0, traders[i].address))
+    } else {
+      waits.push(latestLiquidityPoolContract.connect(traders[i+1]).liquidateByAMM(0, traders[i].address))
+    }
   }
+  const txs = await Promise.all(waits)
   const end1Time = Date.now();
   console.log(
     `End Sent liquidate time: ${end1Time},`,
     `Spend: ${(end1Time-startTime)/1000}s,`,
     `Tps: ${traders.length / (end1Time-startTime)*1000} of ${traders.length} traders.`,
   );
-  const receipts = await Promise.all(waits.map(x => x.wait()));
+  const receipts = await Promise.all(txs.map(x => x.wait()));
   const end2Time = Date.now();
   console.log(
     `End liquidate time: ${end2Time},`,
