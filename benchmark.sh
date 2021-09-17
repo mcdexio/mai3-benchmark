@@ -25,7 +25,7 @@ echo "Deploy Arbitrum(L2) contract to L1"
 
 # Build L2: equal to yarn demo:initialize, demo:deploy
 yarn demo:initialize
-yarn demo:deploy
+yarn demo:deploy --detach
 
 # Setup L2
 yarn remove-whitelist
