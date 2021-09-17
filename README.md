@@ -2,7 +2,8 @@
 
 1. git clone git@github.com:mcdexio/mai3-benchmark.git
 2. cd mai3-benchmark
-3. git submodule update --init --recursive
+3. git checkout dev
+4. git submodule update --init --recursive
 
 # Arbitrum
 1. cd arbitrum
