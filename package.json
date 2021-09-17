@@ -22,7 +22,9 @@
     "remove-whitelist": "yarn workspace arbitrum remove-whitelist",
     "deposit": "yarn workspace arbitrum deposit",
     "benchmark": "hardhat --network local_development run scripts/benchmark.ts",
-    "deploy:live": "yarn workspace arbitrum deploy:live"
+    "deploy:live": "yarn workspace arbitrum deploy:live",
+    "demo:initialize": "yarn workspace arbitrum demo:initialize",
+    "demo:deploy": "yarn workspace arbitrum demo:deploy"
   },
   "repository": {
     "type": "git",
