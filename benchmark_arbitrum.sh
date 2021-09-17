@@ -17,7 +17,7 @@ yarn build
 
 cd $GITROOT
 # Build L1: equal to yarn docker:build:geth, yarn docker:geth
-docker-compose -t docker-compsoe-arbitrum.yml up -d arb-bridge-eth-geth
+docker-compose -f docker-compsoe-arbitrum.yml up -d arb-bridge-eth-geth
 while ! nc -z localhost 7545; do sleep 2; done;
 echo "Finished waiting for geth on localhost:7545..."
 yarn arbitrum:deploy:live --network local_development --export bridge_eth_addresses.json && [ -f bridge_eth_addresses.json ]
