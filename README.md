@@ -1,4 +1,10 @@
 # mai3-benchmark
+## necessary packages
+* python3 * pip3
+* docker & docker-compose
+* node
+* truffle
+* yarn
 ## easy to start
 `git checkout dev` <br>
 `./benchmark_arbitrum.sh`
