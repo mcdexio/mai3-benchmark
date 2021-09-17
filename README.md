@@ -1,6 +1,6 @@
 # mai3-benchmark
 ## necessary packages
-* python3 * pip3
+* python3 & pip3
 * docker & docker-compose
 * node
 * truffle
