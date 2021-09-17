@@ -31,8 +31,3 @@ services:
             - "personal,admin,eth,net,web3,miner,txpool,debug"
             - --gcmode=archive
             - --rpc.allow-unprotected-txs
-    arb:
-        build:
-          context: .
-          dockerfile: arb.Dockerfile
-        image: arb:latest

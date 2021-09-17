@@ -25,7 +25,7 @@ echo "Deploy Arbitrum(L2) contract to L1"
 
 # Build L2: equal to yarn demo:initialize, demo:deploy
 yarn arbitrum:demo:initialize
-yarn arbitrum:demo:deploy --detach --benchmark-docker-compose-path=$GITROOT/docker-compose-arbitrum.yml
+yarn arbitrum:demo:deploy --benchmark-docker-compose-path=$GITROOT/docker-compose-arbitrum.yml
 
 # Setup L2
 yarn arbitrum:remove-whitelist
