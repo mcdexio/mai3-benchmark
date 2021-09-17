@@ -1,10 +1,13 @@
 # mai3-benchmark
-## necessary packages
+## Notice
+### necessary packages
 * python3 & pip3
 * docker & docker-compose
 * node
 * truffle
 * yarn
+### github repository issue
+* check your github's ssh work or change Arbitrum's url from SSH to HTTP
 ## easy to start
 `git checkout dev` <br>
 `./benchmark_arbitrum.sh`
