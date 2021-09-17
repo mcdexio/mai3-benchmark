@@ -20,7 +20,7 @@
   },
   "scripts": {
     "remove-whitelist": "yarn workspace arbitrum remove-whitelist",
-    "deposit": "yarn workspace arbitrum deposit",
+    "deposit-only-for-benchmark": "yarn workspace arbitrum deposit 0xd3b925Dbd7272FA5a4aC88602923fD889616a1A9 ffb2b26161e081f0cdf9db67200ee0ce25499d5ee683180a9781e6cceb791c39 0x81183C9C61bdf79DB7330BBcda47Be30c0a85064 10000000000000000000000",
     "benchmark": "hardhat --network local_development run scripts/benchmark.ts",
     "deploy:live": "yarn workspace arbitrum deploy:live",
     "demo:initialize": "yarn workspace arbitrum demo:initialize",
