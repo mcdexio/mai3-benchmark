@@ -16,13 +16,11 @@ yarn
 yarn build
 
 cd $GITROOT
-# Build L1: equal to docker:build:geth, docker:geth
-yarn docker:build:geth
-yarn docker:geth
-# docker-compose up arb-bridge-eth-geth -d
-# while ! nc -z localhost 7545; do sleep 2; done;
-# echo "Finished waiting for geth on localhost:7545..."
-# yarn deploy:live --network local_development --export bridge_eth_addresses.json && [ -f bridge_eth_addresses.json ]
+# Build L1: equal to yarn docker:build:geth, yarn docker:geth
+docker-compose up -d arb-bridge-eth-geth
+while ! nc -z localhost 7545; do sleep 2; done;
+echo "Finished waiting for geth on localhost:7545..."
+yarn deploy:live --network local_development --export bridge_eth_addresses.json && [ -f bridge_eth_addresses.json ]
 echo "Deploy Arbitrum(L2) contract to L1"
 
 # Build L2: equal to yarn demo:initialize, demo:deploy
