@@ -29,3 +29,8 @@ yarn demo:deploy --detach --benchmark-docker-compose-path=$GITROOT/docker-compos
 
 # Setup L2
 yarn remove-whitelist
+yarn deposit-only-for-benchmark
+
+# test benchmark
+yarn
+yarn benchmark
