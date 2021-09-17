@@ -6,6 +6,7 @@ networks:
       name: arb-network
 services:
   arb-bridge-eth-geth:
+    # equal to docker:build:geth
     build:
       context: arbitrum/packages/arb-bridge-eth
       dockerfile: geth.Dockerfile
