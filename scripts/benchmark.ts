@@ -17,7 +17,7 @@ function toWei(n) {
   return hre.ethers.utils.parseEther(n);
 }
 
-const COUNT = 3;
+const COUNT = 100;
 const vaultFeeRate = toWei("0.00015");
 const vault = "0x81183C9C61bdf79DB7330BBcda47Be30c0a85064";
 const USE_TARGET_LEVERAGE = 0x8000000;
