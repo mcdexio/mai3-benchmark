@@ -7,10 +7,12 @@
 * truffle
 * yarn
 ### github repository issue
-* check your github's ssh work or change Arbitrum's url from SSH to HTTP
+* check your github's ssh connection or change Arbitrum's url from SSH to HTTP
+  * by `vim .gitmodules`
 ## easy to start
-`git checkout dev` <br>
-`./benchmark_arbitrum.sh or sudo ./benchmark_arbitrum.sh`
+1. `git checkout dev` <br>
+2. `./benchmark_arbitrum.sh` <br>
+   1. `sudo ./benchmark_arbitrum.sh (make sure your sudo environment has necessary packages)`
 
 # Archive
 <span style="color:gray">
