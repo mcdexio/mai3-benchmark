@@ -1,7 +1,7 @@
 # mai3-benchmark
 ## easy to start
 `git checkout dev` <br>
-`./benchmark.sh`
+`./benchmark_arbitrum.sh`
 
 # Archive
 <span style="color:gray">
