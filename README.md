@@ -10,10 +10,8 @@
 * check your github's ssh connection or change Arbitrum's url from SSH to HTTP
   * by `vim .gitmodules`
 ## easy to start
-1. how many transactions you want to evaluate
-   1. edit `COUNT` variable under `scripts/benchmark.ts`
-2`./benchmark_arbitrum.sh` <br>
-   2. `sudo ./benchmark_arbitrum.sh (make sure your sudo environment has necessary packages)`
+1.`./benchmark_arbitrum.sh` <br>
+   2. or `sudo ./benchmark_arbitrum.sh (make sure your sudo environment has necessary packages)`
 
 # Archive
 <span style="color:gray">
