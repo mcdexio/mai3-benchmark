@@ -1,3 +1,4 @@
 [submodule "arbitrum"]
 	path = arbitrum
-	url = https://github.com/champfu-mcdex/arbitrum.git
+	url = git@github.com:champfu-mcdex/arbitrum.git
+	branch = testnet
