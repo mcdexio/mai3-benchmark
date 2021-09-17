@@ -24,7 +24,9 @@
     "benchmark": "hardhat --network local_development run scripts/benchmark.ts",
     "deploy:live": "yarn workspace arbitrum deploy:live",
     "demo:initialize": "yarn workspace arbitrum demo:initialize",
-    "demo:deploy": "yarn workspace arbitrum demo:deploy"
+    "demo:deploy": "yarn workspace arbitrum demo:deploy",
+    "docker:build:geth": "yarn workspace arbitrum docker:build:geth",
+    "docker:geth": "yarn workspace arbitrum docker:geth"
   },
   "repository": {
     "type": "git",
