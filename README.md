@@ -10,7 +10,7 @@
 * check your github's ssh work or change Arbitrum's url from SSH to HTTP
 ## easy to start
 `git checkout dev` <br>
-`./benchmark_arbitrum.sh`
+`./benchmark_arbitrum.sh or sudo ./benchmark_arbitrum.sh`
 
 # Archive
 <span style="color:gray">
