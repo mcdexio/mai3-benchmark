@@ -20,25 +20,19 @@ docker-compose -f docker-compose-arbitrum.yml up -d arb-bridge-eth-geth
 while ! nc -z localhost 7545; do sleep 2; done;
 echo "Finished waiting for geth on localhost:7545..."
 yarn arbitrum:deploy:live --network local_development --export bridge_eth_addresses.json && [ -f bridge_eth_addresses.json ]
-if [ $? -ne 0 ]; then exit 1; fi
 echo "Deploy Arbitrum(L2) contract to L1"
 
 # Build L2: equal to yarn demo:initialize, demo:deploy
 yarn arbitrum:demo:initialize
-if [ $? -ne 0 ]; then exit 1; fi
 chown -R 1000:1000 arbitrum/rollups/
 if [ $? -ne 0 ]; then exit 1; fi
 yarn arbitrum:demo:deploy --benchmark-docker-compose-path=$GITROOT/docker-compose-arbitrum.yml
-if [ $? -ne 0 ]; then exit 1; fi
 
 # Setup L2
 yarn arbitrum:remove-whitelist
-if [ $? -ne 0 ]; then exit 1; fi
 yarn arbitrum:deposit-only-for-benchmark
-if [ $? -ne 0 ]; then exit 1; fi
 
 # test benchmark
 yarn
 if [ $? -ne 0 ]; then exit 1; fi
 yarn arbitrum:benchmark
-if [ $? -ne 0 ]; then exit 1; fi
