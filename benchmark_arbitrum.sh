@@ -24,8 +24,11 @@ echo "Deploy Arbitrum(L2) contract to L1"
 
 # Build L2: equal to yarn demo:initialize, demo:deploy
 yarn arbitrum:demo:initialize
-chown -R 1000:1000 arbitrum/rollups/
-if [ $? -ne 0 ]; then exit 1; fi
+if [ "$USER" == "root" ]
+then
+  chown -R 1000:1000 arbitrum/rollups/
+  if [ $? -ne 0 ]; then exit 1; fi
+fi
 yarn arbitrum:demo:deploy --benchmark-docker-compose-path=$GITROOT/docker-compose-arbitrum.yml
 
 # Setup L2
