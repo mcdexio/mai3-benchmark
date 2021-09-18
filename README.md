@@ -19,7 +19,7 @@
       1. make sure your sudo environment has necessary packages
 
 ### run benchmark only (make sure Arbitrum is running)
-1. `yarn benchmark` under mai3-benchmark
+1. `yarn arbitrum:benchmark` under mai3-benchmark
 
 ### what have done in quick start
 1. Build geth locally
