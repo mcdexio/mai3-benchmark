@@ -12,8 +12,10 @@
 1. git clone git@github.com:mcdexio/mai3-benchmark.git
 2. cd mai3-benchmark
 3. git submodule update --init --recursive
-   1. check your github's ssh connection or change Arbitrum's URL from SSH to HTTP
-      1. by `vim .gitmodules`
+   1. github connection (two ways to solve)
+      1. check your github's ssh connection
+      2. change Arbitrum's URL from SSH to HTTP
+         1. by `vim .gitmodules` from `git@github.com:champfu-mcdex/arbitrum.git` to `https://github.com/champfu-mcdex/arbitrum.git`
 4. `./benchmark_arbitrum.sh`
    1. or `sudo ./benchmark_arbitrum.sh`
       1. make sure your sudo environment has necessary packages
