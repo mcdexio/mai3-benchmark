@@ -22,6 +22,13 @@ module.exports = {
     localhost: {
       url: 'http://127.0.0.1:8545/',
     },
+    arbrinkeby: {
+      url: "https://rinkeby.arbitrum.io/rpc",
+      gasPrice: 1e9,
+      accounts: [pk],
+      timeout: 300000,
+      confirmations: 1,
+    },
     local_development: {
       url: 'http://127.0.0.1:8547',
       accounts: [pk],
