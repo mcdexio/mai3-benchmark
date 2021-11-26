@@ -38,14 +38,14 @@ let disperseContract;
 let liquidityPoolContract;
 let USDCContract;
 let masterAcc;
-let arb;
+let gasPriceReader;
 const USDCAddress = "0x09b98f8b2395d076514037ff7d39a091a536206c"
 
 async function setup(ethers, deployer, accounts) {
   console.log("start setup");
   masterAcc = accounts[0];
 
-  arb = new ethersJS.Contract('0x000000000000000000000000000000000000006C', gasPriceABI, ethers.provider)
+  gasPriceReader = new ethersJS.Contract('0x000000000000000000000000000000000000006C', gasPriceABI, ethers.provider)
 
   USDCContract = await deployer.getContractAt("CustomERC20", USDCAddress);
 
@@ -134,7 +134,7 @@ async function tradeBenchmark() {
   const posBig = new BigNumber(pos).shiftedBy(18);
 
   const ops = async (x) => {
-    const [ perL2Tx, perL1CalldataUnit, perStorageCell, perArbGasBase, perArbGasCongestion, perArbGasTotal ] = await arb.callStatic.getPricesInWei()
+    const [ perL2Tx, perL1CalldataUnit, perStorageCell, perArbGasBase, perArbGasCongestion, perArbGasTotal ] = await gasPriceReader.callStatic.getPricesInWei()
     const gasPrice = await hreEthers.provider.getGasPrice() // { BigNumber: "69697580701" }
     let text = "gasPrice " + String(gasPrice);
     text += "perArbGasTotal " + String(perArbGasTotal)
