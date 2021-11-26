@@ -17,7 +17,7 @@ const ENV: DeploymentOptions = {
 };
 
 function write(text) {
-  fs.writeFileSync("document.txt",
+  fs.writeFileSync("stressTesting.txt",
     text,
     {
       encoding: "utf8",
@@ -33,7 +33,7 @@ function toWei(n) {
 const USDC_PER_TRADER = new BigNumber("1000").shiftedBy(6);
 const ETH_PER_TRADER = new BigNumber("0.1").shiftedBy(18);
 
-const COUNT = 2;
+const COUNT = 50;
 let traders = [];
 const BATCH_SIZE = 10;
 let disperseContract;
