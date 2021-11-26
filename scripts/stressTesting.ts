@@ -87,7 +87,6 @@ async function distribute(count: number, ethers) {
         batch.map((x) => USDC_PER_TRADER.toFixed())
       )
     );
-    console.log("disperse usdc")
     // ETH: distribute 1 eth to traders
     await ensureFinished(
       disperseContract.connect(masterAcc).disperseEther(
@@ -184,6 +183,7 @@ async function main(ethers, deployer, accounts) {
   await preTrade();
   let dateTime = new Date().getSeconds()
   while (dateTime < dateTime + 300) {
+    console.log("tradeBenchmark")
     await tradeBenchmark()
   }
 }
