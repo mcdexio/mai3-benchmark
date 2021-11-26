@@ -30,10 +30,10 @@ function toWei(n) {
   return hre.ethers.utils.parseEther(n);
 }
 
-const USDC_PER_TRADER = new BigNumber("1000").shiftedBy(6);
+const USDC_PER_TRADER = new BigNumber("10000").shiftedBy(6);
 const ETH_PER_TRADER = new BigNumber("0.1").shiftedBy(18);
 
-const COUNT = 50;
+const COUNT = 10;
 let traders = [];
 const BATCH_SIZE = 10;
 let disperseContract;
