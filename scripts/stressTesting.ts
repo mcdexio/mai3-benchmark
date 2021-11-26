@@ -33,7 +33,7 @@ function toWei(n) {
 const USDC_PER_TRADER = new BigNumber("1000").shiftedBy(6);
 const ETH_PER_TRADER = new BigNumber("0.1").shiftedBy(18);
 
-const COUNT = 1;
+const COUNT = 2;
 let traders = [];
 const BATCH_SIZE = 10;
 let disperseContract;
@@ -183,10 +183,8 @@ async function main(ethers, deployer, accounts) {
   await distribute(COUNT, ethers);
   await preTrade();
   let dateTime = new Date().getSeconds()
-  while (dateTime < dateTime + 1800) {
+  while (dateTime < dateTime + 300) {
     await tradeBenchmark()
-    await sleep(10000)
-    console.log("sleep")
   }
 }
 
