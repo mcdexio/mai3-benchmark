@@ -85,6 +85,7 @@ async function distribute(count: number, ethers) {
         batch.map((x) => USDC_PER_TRADER.toFixed())
       )
     );
+    console.log("disperse usdc")
     // ETH: distribute 1 eth to traders
     await ensureFinished(
       disperseContract.connect(masterAcc).disperseEther(
@@ -137,8 +138,8 @@ async function tradeBenchmark() {
     const [ perL2Tx, perL1CalldataUnit, perStorageCell, perArbGasBase, perArbGasCongestion, perArbGasTotal ] = await gasPriceReader.callStatic.getPricesInWei()
     const gasPrice = await hreEthers.provider.getGasPrice() // { BigNumber: "69697580701" }
     let text = "gasPrice " + String(gasPrice);
-    text += "perArbGasTotal " + String(perArbGasTotal)
-    text += "perArbGasCongestion " + String(perArbGasCongestion)
+    text += " perArbGasTotal " + String(perArbGasTotal)
+    text += " perArbGasCongestion " + String(perArbGasCongestion)
     write(text)
     return liquidityPoolContract
       .connect(x)
@@ -171,8 +172,7 @@ async function tradeBenchmark() {
     if (receipt.status !== 1) {
       throw new Error("receipt error:" + receipt);
     }
-    console.log(receipt.tx)
-
+    console.log("receipt tx", receipt.tx)
   }
 }
 
