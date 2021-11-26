@@ -17,11 +17,13 @@ const ENV: DeploymentOptions = {
 };
 
 function write(text) {
-  fs.writeFile("document.txt", text, function(err){
-    if(err){
-      return console.log("write error");
-    }
-  })
+  fs.writeFileSync("document.txt",
+    text,
+    {
+      encoding: "utf8",
+      flag: "a+",
+      mode: 0o666
+    });
 }
 
 function toWei(n) {
@@ -130,16 +132,13 @@ async function preTrade() {
 
 async function tradeBenchmark() {
   const startTime = Date.now();
-  console.log("Start trader time:", startTime);
   const pos = Math.random() * 0.2 - 0.1
   const posBig = new BigNumber(pos).shiftedBy(18);
 
   const ops = async (x) => {
     const [ perL2Tx, perL1CalldataUnit, perStorageCell, perArbGasBase, perArbGasCongestion, perArbGasTotal ] = await gasPriceReader.callStatic.getPricesInWei()
     const gasPrice = await hreEthers.provider.getGasPrice() // { BigNumber: "69697580701" }
-    let text = "gasPrice " + String(gasPrice);
-    text += " perArbGasTotal " + String(perArbGasTotal)
-    text += " perArbGasCongestion " + String(perArbGasCongestion)
+    let text = `gasPrice ${gasPrice}` + ` perArbGasTotal ${perArbGasTotal}` + ` perArbGasCongestion ${perArbGasCongestion}\n`
     write(text)
     return liquidityPoolContract
       .connect(x)
@@ -156,23 +155,25 @@ async function tradeBenchmark() {
   const txs = await Promise.all(traders.map((trader) => ops(trader)));
   const end1Time = Date.now();
 
-  console.log(
-    `End Sent Trade time: ${end1Time},`,
-    `Spend: ${(end1Time-startTime)/1000}s,`,
-    `Tps: ${traders.length / (end1Time-startTime)*1000} of ${traders.length} traders.`,
-  );
+  let text =
+    `End Sent Trade time: ${end1Time}, ` +
+    `Spend: ${(end1Time-startTime)/1000}s, ` +
+    `Tps: ${traders.length / (end1Time-startTime)*1000} of ${traders.length} traders.\n`;
+  write(text)
+
   const receipts = await Promise.all(txs.map((x) => x.wait()));
   const end2Time = Date.now();
-  console.log(
-    `End Trade time: ${end2Time},`,
-    `Spend: ${(end2Time-startTime)/1000}s,`,
-    `Tps: ${traders.length / (end2Time-startTime)*1000} of ${traders.length} traders.`,
-  );
+  text =
+    `End Trade time: ${end2Time}, ` +
+    `Spend: ${(end2Time-startTime)/1000}s, ` +
+    `Tps: ${traders.length / (end2Time-startTime)*1000} of ${traders.length} traders.\n`;
+  write(text)
   for (let receipt of receipts) {
     if (receipt.status !== 1) {
       throw new Error("receipt error:" + receipt);
     }
-    console.log("receipt", receipt)
+    let text = `receipt from: ${receipt.from}` + ` tx hash: ${receipt.transactionHash}` + ` block hash: ${receipt.blockHash}\n`
+    write(text)
   }
 }
 
@@ -185,6 +186,7 @@ async function main(ethers, deployer, accounts) {
   while (dateTime < dateTime + 1800) {
     await tradeBenchmark()
     await sleep(10000)
+    console.log("sleep")
   }
 }
 
