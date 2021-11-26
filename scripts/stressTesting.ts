@@ -8,7 +8,7 @@ const hreEthers = hre.ethers;
 const NONE = "0x0000000000000000000000000000000000000000";
 import {ethers as ethersJS} from "ethers";
 
-const abi = [{"inputs":[],"name":"getPricesInWei","outputs":[{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}]
+const gasPriceABI = [{"inputs":[],"name":"getPricesInWei","outputs":[{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}]
 
 const ENV: DeploymentOptions = {
   network: hre.network.name,
@@ -29,7 +29,7 @@ function toWei(n) {
 }
 
 const USDC_PER_TRADER = new BigNumber("1000").shiftedBy(6);
-const ETH_PER_TRADER = new BigNumber("1").shiftedBy(18);
+const ETH_PER_TRADER = new BigNumber("0.1").shiftedBy(18);
 
 const COUNT = 1;
 let traders = [];
@@ -45,7 +45,7 @@ async function setup(ethers, deployer, accounts) {
   console.log("start setup");
   masterAcc = accounts[0];
 
-  arb = new ethersJS.Contract('0x000000000000000000000000000000000000006C', abi, ethers.provider)
+  arb = new ethersJS.Contract('0x000000000000000000000000000000000000006C', gasPriceABI, ethers.provider)
 
   USDCContract = await deployer.getContractAt("CustomERC20", USDCAddress);
 
