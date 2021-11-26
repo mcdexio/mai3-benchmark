@@ -17,7 +17,7 @@ const ENV: DeploymentOptions = {
 };
 
 function write(text) {
-  fs.writeFileSync("document.txt", text, function(err){
+  fs.writeFile("document.txt", text, function(err){
     if(err){
       return console.log("write error");
     }
@@ -172,7 +172,7 @@ async function tradeBenchmark() {
     if (receipt.status !== 1) {
       throw new Error("receipt error:" + receipt);
     }
-    console.log("receipt tx", receipt.tx)
+    console.log("receipt", receipt)
   }
 }
 
