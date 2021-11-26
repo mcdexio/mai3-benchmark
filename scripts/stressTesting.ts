@@ -1,5 +1,5 @@
 import {restorableEnviron} from "./deployer/environ";
-import {ensureFinished, printError} from "./deployer/utils";
+import {ensureFinished, printError, sleep} from "./deployer/utils";
 import {DeploymentOptions} from "./deployer/deployer";
 import BigNumber from "bignumber.js";
 const fs = require("fs");
@@ -181,7 +181,11 @@ async function main(ethers, deployer, accounts) {
   await setup(ethers, deployer, accounts);
   await distribute(COUNT, ethers);
   await preTrade();
-  await tradeBenchmark()
+  let dateTime = new Date().getSeconds()
+  while (dateTime < dateTime + 1800) {
+    await tradeBenchmark()
+    await sleep(10000)
+  }
 }
 
 hreEthers
